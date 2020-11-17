@@ -2,6 +2,11 @@
 #
 # Update grub config to use new kernel. You need to be root to run this script.
 
+if [ ! "$USER" = "root" ]; then
+  echo 'You must run this as root.'
+  exit 1
+fi
+
 # After installing the new kernel for the first time, `/boot/grub2/grub.cfg` is
 # added a new menuentry with the new kernel as target, BUT weirdly its id is
 # the same as the id of the old menuentry. So we run `grub2-mkconfig` again to

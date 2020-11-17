@@ -20,6 +20,7 @@ if [ ! -f .config ]; then
   # menuconfig`.  But there seems no way to automate `make menuconfig`, so let
   # user do that.
   echo 'Please run `make menuconfig` manually.'
+  exit 1
 fi
 
 make bzImage
