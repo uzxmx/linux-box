@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#
+# Download linux source by using tsinghua mirror.
+
+set -eo pipefail
+
+if [ -f "$(dirname "$BASH_SOURCE")/../.env" ]; then
+  source "$(dirname "$BASH_SOURCE")/../.env"
+fi
+
+path_to_save="$HOME/linux-$KERNEL_VERSION.tar.xz"
+
+if [ ! -d "$KERNEL_SRC_ROOT" ] || [ ! -f "$KERNEL_SRC_ROOT/Makefile" ]; then
+  rm -rf "$KERNEL_SRC_ROOT"
+
+  curl -C- -L -o "$path_to_save" \
+    "https://mirrors.tuna.tsinghua.edu.cn/kernel/v$(echo $KERNEL_VERSION | awk -F. '{print $1}').x/linux-$KERNEL_VERSION.tar.xz"
+
+  tar Jxf "$path_to_save" -C "$(dirname "$path_to_save")"
+fi

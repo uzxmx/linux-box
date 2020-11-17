@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+# Build linux kernel.
+
+set -eo pipefail
+
+if [ -f "$(dirname "$BASH_SOURCE")/../.env" ]; then
+  source "$(dirname "$BASH_SOURCE")/../.env"
+fi
+
+cd "$KERNEL_SRC_ROOT"
+
+if ! type flex &>/dev/null || ! type bison &>/dev/null; then
+  sudo yum install -y flex bison
+fi
+
+if [ ! -f .config ]; then
+  # When using `make defconfig`, the new kernel cannot be installed
+  # successfully on Centos 7 because something is missing. So we use `make
+  # menuconfig`.  But there seems no way to automate `make menuconfig`, so let
+  # user do that.
+  echo 'Please run `make menuconfig` manually.'
+fi
+
+make bzImage
+make modules
+sudo make modules_install
+
+if [ -f /etc/kernel/postinst.d/vboxadd ]; then
+  # When installing a new kernel, Centos 7 executes `/usr/sbin/new-kernel-pkg`.
+  # At the end of its execution, it calls `rpmposttrans` function to execute
+  # post-install scripts under `/etc/kernel/postinst.d/` directory. In
+  # Virtualbox VM, there is a `/etc/kernel/postinst.d/vboxadd` file. But when
+  # executing that file, some error will happen. So we just comment the
+  # contents in that file and continue the kernel installation.
+  sudo sed -i 's:^\(/sbin/rcvboxadd.*\)$:# \1:' /etc/kernel/postinst.d/vboxadd
+fi
+
+# This will update vmlinuz link under `/boot` to a new linux version.
+sudo make install
