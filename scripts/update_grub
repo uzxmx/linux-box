@@ -2,6 +2,8 @@
 #
 # Update grub config to use new kernel. You need to be root to run this script.
 
+set -eo pipefail
+
 if [ ! "$USER" = "root" ]; then
   echo 'You must run this as root.'
   exit 1
@@ -13,8 +15,6 @@ fi
 # generate a different menuentry id.
 generated_grub_file="/boot/grub2/grub.cfg"
 grub2-mkconfig -o "$generated_grub_file"
-
-set -eo pipefail
 
 add_setting() {
   local name="$1"

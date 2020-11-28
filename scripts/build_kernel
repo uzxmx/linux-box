@@ -27,15 +27,21 @@ make bzImage
 make modules
 sudo make modules_install
 
-if [ -f /etc/kernel/postinst.d/vboxadd ]; then
-  # When installing a new kernel, Centos 7 executes `/usr/sbin/new-kernel-pkg`.
-  # At the end of its execution, it calls `rpmposttrans` function to execute
-  # post-install scripts under `/etc/kernel/postinst.d/` directory. In
-  # Virtualbox VM, there is a `/etc/kernel/postinst.d/vboxadd` file. But when
-  # executing that file, some error will happen. So we just comment the
-  # contents in that file and continue the kernel installation.
-  sudo sed -i 's:^\(/sbin/rcvboxadd.*\)$:# \1:' /etc/kernel/postinst.d/vboxadd
-fi
+# When installing a new kernel, Centos 7 executes `/usr/sbin/new-kernel-pkg`.
+# At the end of its execution, it calls `rpmposttrans` function to execute
+# post-install scripts under `/etc/kernel/postinst.d/` directory. In Virtualbox
+# VM, there is a `/etc/kernel/postinst.d/vboxadd` file. But when executing that
+# file, some error may happen. The most probable reason is some codes in
+# `/opt/VBoxGuestAdditions-VERSION` source directory is imcompatible with the
+# new kernel and cannot be built successfully. So we need to update the
+# VirtualBox to a new version and install the correspondiing version for
+# VBoxGuestAdditions. But if you don't care about the VBoxGuestAdditions, you
+# can uncomment below codes to skip the building. These codes can also be used
+# when you don't want to build it every time.
+#
+# if [ -f /etc/kernel/postinst.d/vboxadd ]; then
+#   sudo sed -i 's:^\(/sbin/rcvboxadd.*\)$:# \1:' /etc/kernel/postinst.d/vboxadd
+# fi
 
 # This will update vmlinuz link under `/boot` to a new linux version.
 sudo make install
